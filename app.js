@@ -1,10 +1,47 @@
-const http = require('http');
+const Fastify = require("fastify");
+require("pino-pretty");
 
-http.createServer((req, res) => {
-	if(req.url === '/hello' && req.method === 'GET') {
-		res.write('Hello World!');
-		res.end();
-	}
-}).listen(3000, () => {
-	console.log('Server is running on http://localhost:3000');
-})
+const { IS_DEV_ENV } = require("./config");
+const { patchRouting } = require("./routes");
+
+/**
+ * Initializes and configures the Fastify instance
+ * @returns {import("fastify").FastifyInstance} Configured Fastify instance
+ */
+const bootstrapFastify = () => {
+  // Create a Fastify instance with desired options
+  const fastify = Fastify({
+    exposeHeadRoutes: false,
+    connectionTimeout: 20000,
+    ignoreTrailingSlash: false,
+    logger: !IS_DEV_ENV || {
+      level: "debug",
+      transport: {
+        target: "@mgcrea/pino-pretty-compact",
+        options: {
+          colorize: true,
+          translateTime: "HH:MM:ss Z",
+          ignore: "pid,hostname",
+        },
+      },
+    },
+    disableRequestLogging: true,
+  });
+
+  // Register plugins, routes, etc.
+  patchRouting(fastify);
+
+  if (IS_DEV_ENV) {
+    // require("@mgcrea/pino-pretty-compact");
+
+    fastify.register(require("@mgcrea/fastify-request-logger"), {});
+
+    fastify.ready(() => {
+      console.log(`\nAPI Structure\n${fastify.printRoutes()}`);
+    });
+  }
+
+  return fastify;
+};
+
+module.exports = { bootstrapFastify };
