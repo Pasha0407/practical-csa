@@ -1,11 +1,11 @@
-const { resourceRepository } = require("./../../repositories/resource.repo");
+const { receiptRepository } = require("../../repositories/receipt.repo");
 
 module.exports = {
   /**
    * @type {import('fastify').RouteOptions}
    */
-  getResource: {
-    url: "/resources/:id",
+  getReceipt: {
+    url: "/receipts/:id",
     method: "GET",
     schema: {
       params: {
@@ -20,7 +20,7 @@ module.exports = {
       try {
         const targetId = request.params.id;
 
-        const found = await resourceRepository.findByPK(targetId);
+        const found = await receiptRepository.findById(targetId);
 
         if (!found) {
           return reply.code(404).send({

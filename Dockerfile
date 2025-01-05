@@ -12,10 +12,9 @@ COPY package*.json ./
 RUN npm install
 
 # Copy the rest of the application
-COPY . .
+COPY --chown=node:node . .
 
-# Change the owner of the project files to the node user
-RUN chown -R node /srv/node/app
+RUN npx prisma generate
 
 # Switch to the node user
 USER node
@@ -30,4 +29,4 @@ EXPOSE 9229
 ENV NODE_ENV=development
 
 # Use nodemon for automatic server reloads in development
-CMD ["nodemon", "--inspect=0.0.0.0:9229", "server.js"]
+CMD ["npm", "start"]

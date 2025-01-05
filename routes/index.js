@@ -1,4 +1,5 @@
 const { resourcesRouter } = require("./resources");
+const { receiptsRouter } = require("./receipts");
 
 /**
  * Patch the routing of the fastify instance
@@ -24,5 +25,6 @@ module.exports.patchRouting = (fastify) => {
   });
 
   // Register routes
+  fastify.register(receiptsRouter);
   fastify.register(resourcesRouter);
 };
